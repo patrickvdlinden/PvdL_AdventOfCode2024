@@ -6,5 +6,5 @@ public interface IPuzzle
 
     void ParseInput(string input);
 
-    IPuzzleResult? Solve();
+    IPuzzleResult Solve();
 }

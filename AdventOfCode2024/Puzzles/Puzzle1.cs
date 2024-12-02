@@ -14,6 +14,10 @@ public class Puzzle1 : IPuzzle
 
     public void ParseInput(string input)
     {
+        IsInputParsed = false;
+        _list1.Clear();
+        _list2.Clear();
+
         var lines = input.Split(['\r', '\n'], StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         var lineNumber = 0;
         foreach (var line in lines)
@@ -48,7 +52,7 @@ public class Puzzle1 : IPuzzle
         Console.WriteLine("List 1 Count: {0}, List 2 Count: {1}", _list1.Count, _list2.Count);
     }
 
-    public IPuzzleResult? Solve()
+    public IPuzzleResult Solve()
     {
         if (!IsInputParsed)
         {
