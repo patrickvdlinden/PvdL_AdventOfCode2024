@@ -29,15 +29,10 @@ public class Puzzle3 : IPuzzle
 
         do
         {
-            var instructionMatch = Regex.Match(match.Groups[0].Value, @"([\w']+)\(");
-            if (!instructionMatch.Success)
-            {
-                throw new FormatException($"Could not parse the instruction value '{match.Groups[0].Value}'.");
-            }
-
-            // All the relevant instructions have been found. It's now time to implement them.
-            var instruction = instructionMatch.Groups[1].Value;
-            if (instruction == "mul")
+            // All the relevant instructions have been found. It's now time to implement them. The instructions will be
+            // converted to more readable Enum types.
+            var instruction = match.Groups[0].Value;
+            if (instruction.StartsWith("mul"))
             {
                 // The "mul" instruction has two value parts (left, right) which needs parsing to integers.
                 var leftPart = match.Groups[1].Value;
@@ -52,12 +47,15 @@ public class Puzzle3 : IPuzzle
                     throw new FormatException($"Could not parse the right part value '{rightPart}' to an integer.");
                 }
 
-                _instructions.Add(new Instruction(instruction, leftPartValue, rightPartValue));
+                _instructions.Add(Instruction.Multiply(leftPartValue, rightPartValue));
             }
-            else
+            else if (instruction.StartsWith("don't"))
             {
-                // The "do" and "don't" instructions have no value parts.
-                _instructions.Add(new Instruction(instruction, null, null));
+                _instructions.Add(Instruction.Dont());
+            }
+            else if (instruction.StartsWith("do"))
+            {
+                _instructions.Add(Instruction.Do());
             }
 
             match = match.NextMatch();
@@ -70,23 +68,22 @@ public class Puzzle3 : IPuzzle
 
     public IPuzzleResult Solve()
     {
-        // The first part of Puzzle 3 is to find "mul(x,x)" statements within a long string of text, containing all
-        // kinds of other texts, assignments, codes, and other distractions. Even texts like "mul( x, x )" which should
-        // be ignored. The sum of all valid multipliers is the answer to this puzzle.
+        // The first part of Puzzle 3 is to find "Multiplier" instructions within a long string of text, containing all
+        // kinds of other texts, assignments, codes, and other distractions. The sum of all valid multipliers is the
+        // answer to this puzzle.
         var totalScore = 0;
 
-        // The second part of Puzzle 3 makes it a bit more interesting. The input text can contain "do()" and
-        // "don't()" instructions. All "mul(x,x)" instructions should be ignored between the "don't()" and "do()"
-        // instructions.
+        // The second part of Puzzle 3 makes it a bit more interesting. The input text can contain "Do" and
+        // "Don't" instructions. All "Multiply" instructions should be ignored between instructions "Don't" and "Do".
         var shouldApplyInstructions = true;
 
         foreach (var instruction in _instructions)
         {
-            switch (instruction.Name)
+            switch (instruction.Type)
             {
-                case "mul":
-                    // When a "don't()" instruction has appeared, all the "mul" instructions must be ignored until a
-                    // "do()" instruction happens again.
+                case InstructionType.Multiply:
+                    // When a "Don't" instruction has appeared, all the "Multiply" instructions must be ignored until a
+                    // "Do" instruction happens again.
                     if (!shouldApplyInstructions)
                     {
                         break;
@@ -99,11 +96,11 @@ public class Puzzle3 : IPuzzle
                     totalScore += multiplied;
                     break;
 
-                case "don't":
+                case InstructionType.Dont:
                     shouldApplyInstructions = false;
                     break;
 
-                case "do":
+                case InstructionType.Do:
                     shouldApplyInstructions = true;
                     break;
             }
@@ -115,7 +112,37 @@ public class Puzzle3 : IPuzzle
         };
     }
 
-    private record Instruction(string Name, int? Left, int? Right);
+    private enum InstructionType
+    {
+        Multiply,
+        Do,
+        Dont,
+    }
+
+    private record Instruction
+    {
+        private Instruction(InstructionType type, int? left, int? right)
+        {
+            Type = type;
+            Left = left;
+            Right = right;
+        }
+
+        public InstructionType Type { get; }
+
+        public int? Left { get; }
+
+        public int? Right { get; }
+
+        public static Instruction Multiply(int left, int right)
+            => new(InstructionType.Multiply, left, right);
+
+        public static Instruction Do()
+            => new(InstructionType.Do, null, null);
+
+        public static Instruction Dont()
+            => new(InstructionType.Dont, null, null);
+    }
 
     private record PuzzleResult : PuzzleResultBase
     {
