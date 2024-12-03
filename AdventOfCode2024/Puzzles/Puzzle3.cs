@@ -24,7 +24,7 @@ public class Puzzle3 : IPuzzle
         var match = Regex.Match(input, @"mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don't\(\)");
         if (!match.Success)
         {
-            throw new FormatException("The input does not contain any 'mul(x,x)' statements.");
+            throw new FormatException("The input does not contain any known instructions.");
         }
 
         do
