@@ -32,7 +32,7 @@ public class Puzzle3 : IPuzzle
             // All the relevant instructions have been found. It's now time to implement them. The instructions will be
             // converted to more readable Enum types.
             var instruction = match.Groups[0].Value;
-            if (instruction.StartsWith("mul"))
+            if (instruction.StartsWith("mul("))
             {
                 // The "mul" instruction has two value parts (left, right) which needs parsing to integers.
                 var leftPart = match.Groups[1].Value;
@@ -49,11 +49,11 @@ public class Puzzle3 : IPuzzle
 
                 _instructions.Add(Instruction.Multiply(leftPartValue, rightPartValue));
             }
-            else if (instruction.StartsWith("don't"))
+            else if (instruction.StartsWith("don't("))
             {
                 _instructions.Add(Instruction.Dont());
             }
-            else if (instruction.StartsWith("do"))
+            else if (instruction.StartsWith("do("))
             {
                 _instructions.Add(Instruction.Do());
             }
